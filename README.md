@@ -1,5 +1,5 @@
 # eosjs-node-cli
-EOS-nodejs made by Marcel Morales  
+eosjs-node-cli made by Marcel Morales  
 using eosjs https://github.com/EOSIO/eosjs  
   
 USAGE:  
@@ -55,6 +55,7 @@ Uncomment line to enable functions in ./app.js and get --help
 ```eos.getCurrencyStats('XYZ');``` //works for tokens as well  
 //  amount in format '1000.0000 XYZ', receiver, memo:  
 ```eos.createToken('1000.0000 XYZX', 'inita','new Token');```  
+  
 ----OTHER----  
 //  converts '1.3000 EOS' --> 1.3, see floatRegex in eosj.js  
 ```console.log('tofloat: ', eos.toFloat('1.03002000'));```  
