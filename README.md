@@ -8,18 +8,18 @@ Make sure to have docker running as explained at https://github.com/EOSIO/eosjs/
 Uncomment line to enable functions in ./app.js and get --help  
   
 ----BLOCKCHAIN----  
-```eos.getBlockHeight();  
-eos.getCurrentBlockInfo();```   
+```eos.getBlockHeight();```  
+```eos.getCurrentBlockInfo();```   
 
 ----KEYS----  
 //  more infos: https://github.com/EOSIO/eosjs-ecc/blob/master/src/key_private.js  
 //  seed: 'string' any length string. This is private. The same seed produces the same  
 //  private key every time. At least 128 random bits should be used to produce a good private key.  
-```eos.generateRandomPrivKey();  
-console.log('privKey generated from seed SEED123: ', eos.generatePrivKeyFromSeed('SEED123'));  
-eos.fromPrivToPub('5HrZWBGf6ovYBqdDkoGBqzXCKRxyXdkEmke6LVufN3zK4q9Hctc');  
-eos.isPubKeyValid('EOS7pMyqadiD7DE7uZEHuEejZu2Qa7kiMmNVHf35bJEtqyniy8vBG');  
-eos.isPrivKeyValid('5HrZWBGf6ovYBqdDkoGBqzXCKRxyXdkEmke6LVufN3zK4q9Hctc');```  
+```eos.generateRandomPrivKey();```  
+```console.log('privKey generated from seed SEED123: ', eos.generatePrivKeyFromSeed('SEED123'));```  
+```eos.fromPrivToPub('5HrZWBGf6ovYBqdDkoGBqzXCKRxyXdkEmke6LVufN3zK4q9Hctc');```  
+```eos.isPubKeyValid('EOS7pMyqadiD7DE7uZEHuEejZu2Qa7kiMmNVHf35bJEtqyniy8vBG');```  
+```eos.isPrivKeyValid('5HrZWBGf6ovYBqdDkoGBqzXCKRxyXdkEmke6LVufN3zK4q9Hctc');```  
   
 ----ACCOUTS----  
 //  EOS public and private keys can be generated off the chain, but EOS users need to create a user  
@@ -33,8 +33,8 @@ eos.isPrivKeyValid('5HrZWBGf6ovYBqdDkoGBqzXCKRxyXdkEmke6LVufN3zK4q9Hctc');```
 //  can only contain the following symbols: .12345abcdefghijklmnopqrstuvwxyz:  
 //  default: bytes = 8192, stake_net_quantity = '10.0000 SYS', stake_cpu_quantity = '10.0000 SYS',  transfer = 0:  
 //  ownerPubKey and activePubKey can be the same, but is less secure  
-```eos.createAccountPackage('ownerPubKey', 'activePubKey', 'accountName', bytes, stake_net_quantity, stake_cpu_quantity, transfer);  
-eos.createSingleAccount('accountName', ownerPubKey, activePubKey);```  
+```eos.createAccountPackage('ownerPubKey', 'activePubKey', 'accountName', bytes, stake_net_quantity, stake_cpu_quantity, transfer);```  
+```eos.createSingleAccount('accountName', ownerPubKey, activePubKey);```  
   
 ----TRANSACTIONS----  
 // Transactions can be considered confirmed with 99.9% certainty after an average of 0.25 seconds from time of broadcast.  
@@ -47,8 +47,8 @@ eos.createSingleAccount('accountName', ownerPubKey, activePubKey);```
 ```eos.getOutgoingTransactions('binancecleos');```  
 //  perform transaction and add the id + block number as arg:  
 //  where to get blockNumHint? https://github.com/EOSIO/eosjs/issues/288  
-```eos.getTransaction('87134edc78cf9d1d183e896cbd96c8a89144511b33bce91c82f99321d0d2673a', 10251887);  
-eos.isTransactionExecuted('87134edc78cf9d1d183e896cbd96c8a89144511b33bce91c82f99321d0d2673a', 10251887);```  
+```eos.getTransaction('87134edc78cf9d1d183e896cbd96c8a89144511b33bce91c82f99321d0d2673a', 10251887);```  
+```eos.isTransactionExecuted('87134edc78cf9d1d183e896cbd96c8a89144511b33bce91c82f99321d0d2673a', 10251887);```  
   
 ----CURRENCY----  
 ```eos.getCurrencyBalance('inita');``` //using EOS account name  
