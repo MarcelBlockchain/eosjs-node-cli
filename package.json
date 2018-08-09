@@ -1,0 +1,36 @@
+{
+  "name": "eosjs-node-cli",
+  "version": "0.0.1",
+  "description": "basic cleos as nodejs version using eosjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarcelBlockchain/eosjs-node-cli.git"
+  },
+  "keywords": [
+    "cleos",
+    "eos",
+    "nodejs",
+    "eosjs",
+    "javascript",
+    "crypto",
+    "blockchain"
+  ],
+  "author": "Marcel Morales",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/MarcelBlockchain/eosjs-node-cli/issues"
+  },
+  "homepage": "https://github.com/MarcelBlockchain/eosjs-node-cli#readme",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "clear": "^0.1.0",
+    "eosjs": "^16.0.0",
+    "eslint": "^5.3.0",
+    "figlet": "^1.2.0",
+    "prettier": "^1.14.2"
+  }
+}
