@@ -1,8 +1,15 @@
+[![npm version](https://badge.fury.io/js/eosjs-node-cli.svg)](https://www.npmjs.com/package/eosjs-node-cli)
 # eosjs-node-cli
 eosjs-node-cli made by Marcel Morales  
-using [eosjs](https://github.com/EOSIO/eosjs)  
+using [eosjs](https://github.com/EOSIO/eosjs) 
+
+### Versions
+
+| [MarcelBlockchain/eosjs-node-cli](/MarcelBlockchain/eosjs-node-cli) | [Npm](https://www.npmjs.com/package/eosjs-node-cli)  |
+| --- | --- |
+| tag: 0.0.1 | `npm install eosjs-node-cli` |
   
-### Usage
+## Usage
 * Using standard private key on test net by default. Change ```config``` in ```./eos.js```
 * Make sure to have docker running as explained [here](https://github.com/EOSIO/eosjs/tree/master/docker)
 * Uncomment lines to enable functions in ```./app.js``` 
