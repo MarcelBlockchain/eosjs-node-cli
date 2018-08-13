@@ -10,25 +10,25 @@ const blockNumHintTest = '9100334';
 //const pubKey2Test = 'EOS7pMyqadiD7DE7uZEHuEejZu2Qa7kiMmNVHf35bJEtqyniy8vBG';
 
 //----MAIN NET----
-const config = {
-  chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', // main net
-  //keyProvider: ['MY PRIVATE KEY'], //used globally for signing transactions
-  keyProvider: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
-  httpEndpoint: 'https://api.eosnewyork.io:443', //main net
-  expireInSeconds: 60,
-  sign: true,  // sign the transaction with a private key. Leaving a transaction unsigned avoids the need to provide a private key
-  broadcast: true,  //post the transaction to the blockchain. Use false to obtain a fully signed transaction
-  verbose: false, //verbose logging such as API activity
-};
-
-// //----TEST NET----
 // const config = {
+//   chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', // main net
 //   //keyProvider: ['MY PRIVATE KEY'], //used globally for signing transactions
 //   keyProvider: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
-//   //sign: true,  // sign the transaction with a private key. Leaving a transaction unsigned avoids the need to provide a private key
-//   //broadcast: true,  //post the transaction to the blockchain. Use false to obtain a fully signed transaction
+//   httpEndpoint: 'https://api.eosnewyork.io:443', //main net
+//   expireInSeconds: 60,
+//   sign: true,  // sign the transaction with a private key. Leaving a transaction unsigned avoids the need to provide a private key
+//   broadcast: true,  //post the transaction to the blockchain. Use false to obtain a fully signed transaction
 //   verbose: false, //verbose logging such as API activity
 // };
+
+//----TEST NET----
+const config = {
+  //keyProvider: ['MY PRIVATE KEY'], //used globally for signing transactions
+  keyProvider: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
+  //sign: true,  // sign the transaction with a private key. Leaving a transaction unsigned avoids the need to provide a private key
+  //broadcast: true,  //post the transaction to the blockchain. Use false to obtain a fully signed transaction
+  verbose: false, //verbose logging such as API activity
+};
 const eos = Eos(config);
 const { ecc } = Eos.modules;
 
@@ -328,6 +328,30 @@ const _this = module.exports = {
       return tr;
     },
   
+    transferSignPushTransaction : async (from, to, amount, memo = '', sign = true, broadcast = true) => {
+      const options = {
+        authorization: `${from}@active`, //@active for activeKey, @owner for Owner key
+        //default authorizations will be calculated.
+        broadcast,
+        sign,
+      };
+
+      const transaction = await eos.transaction(
+        'eosio.token',
+        acc => {
+          acc.transfer(from, to, amount, memo);
+        },
+        options
+      );
+      //console.log(chalk.red('super big joe: '), transaction.transaction.transaction.actions[0].data); //.actions[0].data
+      //console.log('big joe',transaction.transaction.signatures);
+      const sig = await _this.signTransaction(transaction.transaction.transaction.actions[0].data, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');
+      transaction.transaction.signatures.push(sig);
+      console.log(chalk.green('signed transaction'), transaction.transaction);
+      _this.pushTransaction(transaction.transaction);
+      return transaction.transaction;
+    },
+
     transfer : async (from, to, amount, memo = '', sign = true, broadcast = true) => {
       const options = {
         //authorization: `${from}@active`, //@active for activeKey, @owner for Owner key
@@ -343,14 +367,20 @@ const _this = module.exports = {
         },
         options
       );
-      console.log(transaction);
-      return transaction.transaction;
+      console.log('HERE Transaction: ', transaction);
+        return transaction.transaction;
     },
   
     pushTransaction : async txrID => {
       const pushed = await eos.pushTransaction(txrID);
       console.log('pushed: ', pushed);
       return pushed;
+    },
+    
+    signTransaction : async (trxData = '000000000093dd74000000008093dd7420a10700000000000453595300000000066d794d656d6f', privKey = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3' ) => {
+      const transaction = await ecc.sign(trxData, privKey);
+      console.log('signature: ', transaction);
+      return transaction;
     },
   
     createToken : async (amountNsymbol, to, memo = '') => {

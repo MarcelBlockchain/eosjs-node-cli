@@ -53,7 +53,12 @@ console.log(chalk.green('Uncomment line to enable functions in ./app.js and get 
 // Transactions can be considered confirmed with 99.9% certainty after an average of 0.25 seconds from time of broadcast.
 // The EOS aBFT algorithm provides 100% confirmation of irreversibility within 1 second.
 //  sender, receiver, amount in format: '50.0000 SYS' , memo, sign = true, broadcast = true
-//eos.transfer('inita', 'initb', '50.0000 SYS', 'myMemo', true, true);
+//eos.transfer('inita', 'initb', '4.0000 SYS', 'myMemo1', true, true);
+//first creates an unsigned transaction, signs it and then broadcasts it. All separately. See logs()
+//trx data from transaction.transaction.actions[0].data
+//eos.transferSignPushTransaction('inita', 'initb', '5.0000 SYS', 'myMemo2', false, false);
+//just signs the transaction and returns it:
+//eos.signTransaction(trxData, privKey);
 //  insert return value from eos.transfer(..., signed = true, broadcast = false);
 //eos.pushTransaction(returnValueEos.transfer); 
 //  accountName, (+ int allAboveBlockHeightX --> optional)
@@ -62,7 +67,7 @@ console.log(chalk.green('Uncomment line to enable functions in ./app.js and get 
 //  where to get blockNumHint? https://github.com/EOSIO/eosjs/issues/288
 //eos.getTransaction('87134edc78cf9d1d183e896cbd96c8a89144511b33bce91c82f99321d0d2673a', 10251887);
 //eos.isTransactionExecuted('87134edc78cf9d1d183e896cbd96c8a89144511b33bce91c82f99321d0d2673a', 10251887)
-
+//SIG_K1_KVxbVaErwxYQ7RkngUcJQS7fVojC2nX57uKPg2S9M1cpLsPgioVx4FJaN9nTikxnPX6k3NwY7nLqPPiHmiFybt8JZJ2QjA
 
 //----CURRENCY----
 //eos.getCurrencyBalance('inita'); //using EOS account name

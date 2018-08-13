@@ -7,7 +7,7 @@ using [eosjs](https://github.com/EOSIO/eosjs)
 
 | [MarcelBlockchain/eosjs-node-cli](/MarcelBlockchain/eosjs-node-cli) | [Npm](https://www.npmjs.com/package/eosjs-node-cli)  |
 | --- | --- |
-| tag: 0.0.1 | `npm install eosjs-node-cli` |
+| tag: 0.0.3 | `npm install eosjs-node-cli` |
   
 ## Usage
 * Using standard private key on test net by default. Change ```config``` in ```./eos.js```
@@ -54,6 +54,11 @@ eos.createSingleAccount('accountName', ownerPubKey, activePubKey);
 ```js 
 //  sender, receiver, amount in format: '50.0000 SYS' , memo, sign = true, broadcast = true  
 eos.transfer('inita', 'initb', '50.0000 SYS', 'myMemo', true, true);  
+//first creates an unsigned transaction, signs it and then broadcasts it. All separately. See logs()
+//trx data from transaction.transaction.actions[0].data
+eos.transferSignPushTransaction('inita', 'initb', '5.0000 SYS', 'myMemo2', false, false);
+//just signs the transaction and returns it:
+eos.signTransaction(trxData, privKey);
 //  insert return value from eos.transfer(..., signed = true, broadcast = false);  
 eos.pushTransaction(returnValueEos.transfer);  
 //  accountName, (+ int allAboveBlockHeightX --> optional)  
