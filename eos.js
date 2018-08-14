@@ -219,7 +219,7 @@ const _this = module.exports = {
   
     getCurrentBlockInfo : async () => {
       const result = await _this.getCurrentBlockInfoP();
-      console.log('current block info:  ', result);
+      console.log('current block info: ', result);
       return result;
     },
   
@@ -309,7 +309,7 @@ const _this = module.exports = {
           transfer
         });
       });
-      console.log('createAccount1 tr: ', tr);
+      console.log('createAccountPackage tr: ', tr);
     },
   
     //Must be less than 13 characters
@@ -320,22 +320,22 @@ const _this = module.exports = {
         tr.newaccount({
           creator: 'eosio', //account_name
           name, //new account name
-          owner: 'EOS86rDVGVU5UJAeAvDvRNKGJEDMjxGWr9vJBtBzCUW7s6zK2Puqp', //owner pubkey
-          active: 'EOS86rDVGVU5UJAeAvDvRNKGJEDMjxGWr9vJBtBzCUW7s6zK2Puqp', //active pubkey
+          owner: ownerPubKey, //owner pubkey
+          active: activePubKey, //active pubkey
         });
       });
-      console.log('createAccount2 tr: ', tr);
+      console.log('createSingleAccount tr: ', tr);
       return tr;
     },
   
-    transferSignPushTransaction : async (from, to, amount, memo = '', sign = true, broadcast = true) => {
+    //see https://github.com/EOSIO/eosjs/issues/306
+    transferSignPushTransaction : async (from, to, amount, memo = '', privKey) => {
       const options = {
         authorization: `${from}@active`, //@active for activeKey, @owner for Owner key
         //default authorizations will be calculated.
-        broadcast,
-        sign,
+        broadcast: false,
+        sign: false,
       };
-
       const transaction = await eos.transaction(
         'eosio.token',
         acc => {
@@ -343,11 +343,9 @@ const _this = module.exports = {
         },
         options
       );
-      //console.log(chalk.red('super big joe: '), transaction.transaction.transaction.actions[0].data); //.actions[0].data
-      //console.log('big joe',transaction.transaction.signatures);
-      const sig = await _this.signTransaction(transaction.transaction.transaction.actions[0].data, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');
+      const sig = await _this.signTransaction(transaction.transaction.transaction.actions[0].data, privKey);
       transaction.transaction.signatures.push(sig);
-      console.log(chalk.green('signed transaction'), transaction.transaction);
+      console.log(chalk.green('signed transaction: '), transaction.transaction);
       _this.pushTransaction(transaction.transaction);
       return transaction.transaction;
     },
@@ -367,7 +365,7 @@ const _this = module.exports = {
         },
         options
       );
-      console.log('HERE Transaction: ', transaction);
+      console.log('transfer: ', transaction);
         return transaction.transaction;
     },
   
@@ -377,7 +375,7 @@ const _this = module.exports = {
       return pushed;
     },
     
-    signTransaction : async (trxData = '000000000093dd74000000008093dd7420a10700000000000453595300000000066d794d656d6f', privKey = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3' ) => {
+    signTransaction : async (trxData , privKey ) => {
       const transaction = await ecc.sign(trxData, privKey);
       console.log('signature: ', transaction);
       return transaction;

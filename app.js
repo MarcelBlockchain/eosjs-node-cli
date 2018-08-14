@@ -14,10 +14,18 @@ console.log(chalk.green('Uncomment line to enable functions in ./app.js and get 
 
 //const pubKeyTest = 'EOS86rDVGVU5UJAeAvDvRNKGJEDMjxGWr9vJBtBzCUW7s6zK2Puqp';
 //const privKeyTest = '5HrZWBGf6ovYBqdDkoGBqzXCKRxyXdkEmke6LVufN3zK4q9Hctc';
+//const privKeyTest2 = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3;
 //const accountNameTest = 'binancecleos';
 //const exampleTrxMainNet = '87134edc78cf9d1d183e896cbd96c8a89144511b33bce91c82f99321d0d2673a';
 //const exampleTrxMainNetBlockHeight = 10251887;
 
+//TODO: Required transaction header fields will be added unless you are signing without a network connection (httpEndpoint == null). In that case provide you own headers:
+// //only needed in cold-storage or for offline transactions
+// const headers = {
+//   expiration: '2018-06-14T18:16:10'
+//   ref_block_num: 1,
+//   ref_block_prefix: 452435776
+// }
 //ALL  UNCOMMENTED  FUNCTIONS WILL BE INVOKED WHEN RUNNING node app.js in terminal
 
 //----BLOCKCHAIN----
@@ -56,7 +64,7 @@ console.log(chalk.green('Uncomment line to enable functions in ./app.js and get 
 //eos.transfer('inita', 'initb', '4.0000 SYS', 'myMemo1', true, true);
 //first creates an unsigned transaction, signs it and then broadcasts it. All separately. See logs()
 //trx data from transaction.transaction.actions[0].data
-//eos.transferSignPushTransaction('inita', 'initb', '5.0000 SYS', 'myMemo2', false, false);
+eos.transferSignPushTransaction('inita', 'initb', '5.0000 SYS', 'myMemo2', privKeyTest2);
 //just signs the transaction and returns it:
 //eos.signTransaction(trxData, privKey);
 //  insert return value from eos.transfer(..., signed = true, broadcast = false);
