@@ -392,11 +392,18 @@ const _this = module.exports = {
   
         // Issue some of the max supply for circulation into an arbitrary account
         acc.issue('eosio.token', amountNsymbol, 'issue');
-        acc.transfer('eosio.token', to, '5000.000 LLL', memo);
+        acc.transfer('eosio.token', to, amountNsymbol, memo);
       }); // }, options)
       const balance = await eos.getCurrencyBalance('eosio.token', to);
       console.log(`currency balance ${to}: `, balance);
       const balance2 = await eos.getCurrencyBalance('eosio.token', 'eosio.token');
       console.log('currency balance eosio.token: ', balance2);
+    },
+
+    transferPushTransaction : async (from, to, amount, memo = '') => {
+      const tr = await _this.transfer(from, to, amount, memo, true, false); //has no receipt
+      const push = await _this.pushTransaction(tr); //has receipt, since it was published and is 'executed'
+      console.log('transferred and pushed transaction: ', push);
+      return push;
     },
 };

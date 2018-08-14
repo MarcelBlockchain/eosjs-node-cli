@@ -7,7 +7,7 @@ using [eosjs](https://github.com/EOSIO/eosjs)
 
 | [MarcelBlockchain/eosjs-node-cli](/MarcelBlockchain/eosjs-node-cli) | [Npm](https://www.npmjs.com/package/eosjs-node-cli)  |
 | --- | --- |
-| tag: 0.0.3 | `npm install eosjs-node-cli` |
+| tag: 0.0.5 | `npm install eosjs-node-cli` |
   
 ## Usage
 * Using standard private key on test net by default. Change ```config``` in ```./eos.js```
