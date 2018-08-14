@@ -369,8 +369,8 @@ const _this = module.exports = {
         return transaction.transaction;
     },
   
-    pushTransaction : async txrID => {
-      const pushed = await eos.pushTransaction(txrID);
+    pushTransaction : async tr => {
+      const pushed = await eos.pushTransaction(tr);
       console.log('pushed: ', pushed);
       return pushed;
     },
