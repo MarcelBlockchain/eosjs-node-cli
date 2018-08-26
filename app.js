@@ -12,6 +12,7 @@ console.log(chalk.green('Using standard private key on test net by default. Chan
 console.log(chalk.green('Make sure to have docker running as explained at https://github.com/EOSIO/eosjs/tree/master/docker'))
 console.log(chalk.green('Uncomment line to enable functions in ./app.js and get --help'))
 
+// ----TEST VARIABLES ----
 const pubKeyTest = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV' // from privKeyTest, local test net
 const pubKeyTest2 = 'EOS7pMyqadiD7DE7uZEHuEejZu2Qa7kiMmNVHf35bJEtqyniy8vBG' // from 'itamnetwork2' on main net
 // const pubKeyTest3 = 'EOS86rDVGVU5UJAeAvDvRNKGJEDMjxGWr9vJBtBzCUW7s6zK2Puqp'
@@ -81,8 +82,9 @@ const quantityTest = '2.0000 SYS'
 // eos.transferSignPushTransaction(acc1, acc2, '5.0000 SYS', 'myMemo2')
 //  accountName, (+ int allAboveBlockHeightX --> optional)
 // eos.getOutgoingTransactions(accBinance)
-//  perform transaction and add the id + block number as arg:
-// eos.getTransaction(exampleTrxMainNet, trBlockHeight) // sender: 'binancecleos' on main net
+//  perform transaction and add the id + block number as args
+//  note: example tr only visible when switching to main net
+eos.getTransaction(exampleTrxMainNet, trBlockHeight) // sender: 'binancecleos' on main net
 // eos.isTransactionExecuted(exampleTrxMainNet, trBlockHeight)
 
 // ----CURRENCY----

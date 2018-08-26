@@ -36,7 +36,7 @@ eos.isPrivKeyValid(privKeyTest)
 ## Accounts
 EOS public and private keys can be generated off the chain, but EOS users need to create an account before they can operate on the chain. So activated users are needed to send on-chain transactions to new users in order to help them create accounts. By default users need to find [tripartite help](https://www.zeos.co/).  
 ```js 
-//main net only:  
+//  main net only:  
 eos.getAccountNamesFromPubKey(pubKeyTest2)
 //  main net only: (i.e. 'binancecleos'):
 eos.getAccSystemStats(accBinance)
@@ -46,7 +46,7 @@ eos.getAccSystemStats(accBinance)
 //  ownerPubKey and activePubKey can be the same, but is less secure
 //  optional: bytes, stake_net_quantity, stake_cpu_quantity, transfer
 eos.createAccountPackage('ownerPubKey', 'activePubKey', 'accountName', bytes, stake_net_quantity, stake_cpu_quantity, transfer)
-//  'accountName', ownerPubKey, activePubKey
+//  args: 'accountName', ownerPubKey, activePubKey
 eos.createSingleAccount('accountName', pubKeyTest, pubKeyTest)
 ```  
   
@@ -61,27 +61,33 @@ eos.transferSignPushTransaction(acc1, acc2, '5.0000 SYS', 'myMemo2', privKeyTest
 //  just signs the transaction and returns it:
 //  returns signature. Args: (from, to, quantity, memo = '')
 eos.getSignature(acc1, acc2, quantityTest, memo = 'myMemo7')
+//  signs transaction and returns it. Args: (transaction, from, to, quantity, memo = '')
+eos.signTr(tr, from, to, quantity, memo = 'otherMemo')
 //  insert return value from eos.transfer(..., signed = true, broadcast = false);
-eos.pushTransaction(returnValueFromEos.transfer)
+eos.pushTransaction(returnValueFrom.eos.transfer)
 //  accountName, (+ int allAboveBlockHeightX --> optional)
 eos.getOutgoingTransactions(accBinance)
-//  perform transaction and add the id + block number as arg:
-eos.getTransaction(exampleTrxMainNet, trBlockHeight) // sender: 'binancecleos' on main net
+//  get transaction info. Optionally with a block number hint (trBlockHeight)
+//  note: example tr only visible when switching to main net
+eos.getTransaction(exampleTrxMainNet, trBlockHeight) // sender e.g.: 'binancecleos' on main net
+//  was tr executed? Optionally pass a block number hint (trBlockHeight). Returns bool
 eos.isTransactionExecuted(exampleTrxMainNet, trBlockHeight)
 ```
   
 ## Currency  
 ```js
+// If you look at the result value, you can see an array in the form of a string.
+// This is because there could be tokens with many different symbols in the account
 eos.getCurrencyBalance(acc1) //  using EOS account name
 // works for tokens as well, see https://github.com/eoscafe/eos-airdrops
-// 'SYMBOL', 'eos.contractName'
+// 'SYMBOL', 'eos.contractName'. E.g. 'EOS', 'eosio.token' (main net) / 'SYS', 'eosio.token' (local test net)
 eos.getCurrencyStats('IQ', 'everipediaiq') // IQ on main net
 //  amount in format '1000.0000 XYZ', receiver, memo:
-eos.createToken('1000.0000 XXZX', acc1, 'new Token')
+eos.createToken('1000.0000 XXZX', acc1, 'new token memo')
 ```
 
 ## Other  
 ```js 
-//  converts '1.3000 EOS' --> 1.3, see floatRegex in eosj.js
+//  converts '1.3000 EOS' --> 1.3, see floatRegex in eosjs.js
 console.log('tofloat: ', eos.toFloat('1.03002000'))
 ```

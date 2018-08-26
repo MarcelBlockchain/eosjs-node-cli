@@ -33,29 +33,38 @@ const eos = Eos(config)
 const { ecc } = Eos.modules
 
 const _this = module.exports = {
-  toFloat: str => parseFloat(str.replace(floatRegex, '')),
 
-  fromPrivToPub: wif => {
-    const pubKey = ecc.privateToPublic(wif)
-    console.log('pubKey: ', pubKey)
-    return pubKey
+  //  ---- BLOCKCHAIN ----
+
+  getBlockHeightP: () =>
+    new Promise((resolve, reject) => {
+      eos.getInfo((error, info) => {
+        if (error) reject(error)
+        else resolve(info)
+      })
+    }),
+
+  getBlockHeight: async () => {
+    const result = await _this.getBlockHeightP()
+    console.log('current block height: ', result.head_block_num)
+    return result.head_block_num
   },
 
-  isPubKeyValid: pubKey => {
-    const bool = ecc.isValidPublic(pubKey) === true
-    console.log('is pubKey valid? --> ', bool)
-    return bool
+  getCurrentBlockInfoP: () =>
+    new Promise((resolve, reject) => {
+      eos.getInfo((error, info) => {
+        if (error) reject(error)
+        else resolve(info)
+      })
+    }),
+
+  getCurrentBlockInfo: async () => {
+    const result = await _this.getCurrentBlockInfoP()
+    console.log('current block info: ', result)
+    return result
   },
 
-  isPrivKeyValid: privKey => {
-    const bool = ecc.isValidPrivate(privKey) === true
-    console.log('is privKey valid? --> ', bool)
-    return bool
-  },
-
-  // seed: 'string' any length string. This is private. The same seed produces the same
-  // private key every time. At least 128 random bits should be used to produce a good private key.
-  generatePrivKeyFromSeed: seed => ecc.seedPrivate(seed),
+  //  ---- KEYS ----
 
   // EOS public and private keys can be generated off the chain, but EOS users need to create a user
   // name before they can operate on the chain. So activated users are needed to send on-chain transactions
@@ -75,6 +84,47 @@ const _this = module.exports = {
     return output
   },
 
+  // seed: 'string' any length string. This is private. The same seed produces the same
+  // private key every time. At least 128 random bits should be used to produce a good private key.
+  generatePrivKeyFromSeed: seed => ecc.seedPrivate(seed),
+
+  fromPrivToPub: wif => {
+    const pubKey = ecc.privateToPublic(wif)
+    console.log('pubKey: ', pubKey)
+    return pubKey
+  },
+
+  isPubKeyValid: pubKey => {
+    const bool = ecc.isValidPublic(pubKey) === true
+    console.log('is pubKey valid? --> ', bool)
+    return bool
+  },
+
+  isPrivKeyValid: privKey => {
+    const bool = ecc.isValidPrivate(privKey) === true
+    console.log('is privKey valid? --> ', bool)
+    return bool
+  },
+
+  //  ---- ACCOUNTS ----
+  getAccountNamesFromPubKeyP: pubKey =>
+    new Promise((resolve, reject) => {
+      eos.getKeyAccounts(pubKey, (error, result) => {
+        if (error) reject(error)
+        resolve(result)
+        // array of account names, can be multiples
+        // output example: { account_names: [ 'itamnetwork1', ... ] }
+      })
+    }),
+
+  // main net only:
+  getAccountNamesFromPubKey: async pubKey => {
+    const result = await _this.getAccountNamesFromPubKeyP(pubKey)
+    console.log('account names from pubKey: ', result)
+    return result
+  },
+
+  // id is the 12 character EOS name aka account name
   getAccSystemStatsP: id =>
     new Promise((resolve, reject) => {
       eos.getAccount(id, (error, result) => {
@@ -83,14 +133,14 @@ const _this = module.exports = {
       })
     }),
 
-  // id is the 12 character EOS account name like 'itamnetwork1'
+  //  main net only: (i.e. 'binancecleos'):
   getAccSystemStats: async id => {
     try {
       const result = await _this.getAccSystemStatsP(id)
       // console.log(result); //whole object
       let { cpu_weight, net_weight, ram_bytes } = result
       if (cpu_weight != null) cpu_weight = _this.toFloat(cpu_weight)
-      if (net_weight) net_weight = _this.toFloat(net_weight)
+      if (net_weight != null) net_weight = _this.toFloat(net_weight)
       console.log(`account infos for ${id}:`)
       console.log('CPU weight in EOS: ', cpu_weight)
       console.log('net weight in EOS: ', net_weight)
@@ -102,124 +152,91 @@ const _this = module.exports = {
     }
   },
 
-  getAccountNamesFromPubKeyP: pubKey =>
-    new Promise((resolve, reject) => {
-      eos.getKeyAccounts(pubKey, (error, result) => {
-        if (error) reject(error)
-        resolve(result)
-        // array of account names, can be multiples
-        // output example: { account_names: [ 'itamnetwork1', ... ] }
+  //  account name must be less than 13 characters
+  //  can only contain the following symbols: .12345abcdefghijklmnopqrstuvwxyz:
+  //  default: bytes = 8192, stake_net_quantity = '10.0000 SYS', stake_cpu_quantity = '10.0000 SYS', transfer = 0:
+  //  ownerPubKey and activePubKey can be the same, but is less secure
+  //  optional: bytes, stake_net_quantity, stake_cpu_quantity, transfer
+  createAccountPackage: async (ownerPubKey, activePubKey, name, bytes = 8192, stake_net_quantity = '10.0000 SYS', stake_cpu_quantity = '10.0000 SYS', transfer = 0) => {
+    const tr = await eos.transaction(tr => {
+      tr.newaccount({
+        creator: 'eosio',
+        name,
+        owner: ownerPubKey,
+        active: activePubKey
       })
-    }),
 
-  getAccountNamesFromPubKey: async pubKey => {
-    const result = await _this.getAccountNamesFromPubKeyP(pubKey)
-    console.log('account names from pubKey: ', result)
-    return result
+      tr.buyrambytes({
+        payer: 'eosio',
+        receiver: name,
+        bytes
+      })
+
+      tr.delegatebw({
+        from: 'eosio', // acc_name
+        receiver: name,
+        stake_net_quantity,
+        stake_cpu_quantity,
+        transfer
+      })
+    })
+    console.log('createAccountPackage tr: ', tr)
   },
 
-  // If you look at the result value, you can see an array in the form of a string.
-  // This is because there could be tokens with many different symbols in the account
-  getCurrencyBalanceP: (accountName, contractName = 'eosio.token') =>
-    new Promise((resolve, reject) => {
-      eos.getCurrencyBalance(contractName, accountName, (error, result) => {
-        if (error) reject(error)
-        resolve(result)
+  // Must be less than 13 characters
+  // Can only contain the following symbols: .12345abcdefghijklmnopqrstuvwxyz
+  // args: 'accountName', ownerPubKey, activePubKey
+  createSingleAccount: async (name, ownerPubKey, activePubKey) => {
+    const tr = await eos.transaction(tr => {
+      tr.newaccount({
+        creator: 'eosio', // account_name
+        name, // new account name
+        owner: ownerPubKey, // owner pubkey
+        active: activePubKey // active pubkey
       })
-    }),
-
-  getCurrencyBalance: async (accountName, contractName = 'eosio.token') => {
-    const result = await _this.getCurrencyBalanceP(accountName, contractName)
-    console.log(`balance of ${accountName}: `, result)
+    })
+    console.log('createSingleAccount tr: ', tr)
+    return tr
   },
 
-  getCurrencyStatsP: (symbol, contractName) =>
-    new Promise((resolve, reject) => {
-      eos.getCurrencyStats(contractName, symbol, (error, result) => {
-        if (error) reject(error)
-        resolve(result)
-        // output { EOS: { supply: '1006148640.3388 EOS', max_supply: '10000000000.0000 EOS',
-        //         issuer: 'eosio' } }
-      })
-    }),
-  // works for tokens as well, see https://github.com/eoscafe/eos-airdrops
-  getCurrencyStats: async (symbol, contractName = 'eosio.token') => {
-    const result = await _this.getCurrencyStatsP(symbol, contractName)
-    console.log(result)
-    return result
+  //  ---- TRANSACTIONS ----
+
+  //  sender, receiver, quantity in format: '50.0000 SYS' , memo, | + optional: sign = true, broadcast = true
+  transfer: async (from, to, quantity, memo = '', sign = true, broadcast = true) => {
+    const tr = await eos.transfer(from, to, quantity, memo, { broadcast, sign })
+    console.log('created transaction: ', tr)
+    return tr.transaction
   },
 
-  getBlockHeightP: () =>
-    new Promise((resolve, reject) => {
-      eos.getInfo((error, info) => {
-        if (error) reject(error)
-        else resolve(info)
-      })
-    }),
-
-  getBlockHeight: async () => {
-    const result = await _this.getBlockHeightP()
-    console.log('current block height: ', result.head_block_num)
-    return result.head_block_num
+  //  first creates an unsigned transaction, signs it and then broadcasts it. All separately. See logs()
+  transferSignPushTransaction: async (from, to, quantity, memo = '') => {
+    // creates 1) unsigned transaction 2) signs 3) broadcasts tr
+    const tr = await eos.transfer(from, to, quantity, memo, { broadcast: false, sign: false })
+    console.log('created unsigned tr: ', tr)
+    const signedTr = await _this.signTr(tr, from, to, quantity, memo)
+    await _this.pushTransaction(signedTr.transaction)
   },
 
-  isTransactionExecutedP: async (id, blockNumHint) =>
-    new Promise(async (resolve, reject) => {
-      await eos.getTransaction(id, blockNumHint, (error, info) => {
-        if (error) reject(error)
-        resolve(info.trx.receipt.status === 'executed')
-      })
-    }),
-
-  isTransactionExecuted: async (id, blockNumHint) => {
-    const executed = await _this.isTransactionExecutedP(id, blockNumHint)
-    console.log(`transaction: ${id} \nwas executed: ${executed}`)
-    return executed
+  //  just signs the transaction and returns it:
+  //  returns signature. Args: (from, to, quantity, memo = '')
+  getSignature: async (from, to, quantity, memo = '') => {
+    // returns promise:
+    const tr = await eos.transfer(from, to, quantity, memo, { broadcast: false })
+    console.log('created signature: ', tr.transaction.signatures[0])
+    return tr.transaction.signatures[0]
   },
 
-  // where to get blockNumHint? https://github.com/EOSIO/eosjs/issues/288
-  getTransactionP: async (id, blockNumHint) =>
-    new Promise(async (resolve, reject) => {
-      const blockHeight = await _this.getBlockHeight()
-      await eos.getTransaction(id, blockNumHint, (error, info) => {
-        const res = {}
-        if (error) reject(error)
-        // Transactions can be considered confirmed with 99.9% certainty after an average of 0.25 seconds from time of broadcast.
-        // The EOS aBFT algorithm provides 100% confirmation of irreversibility within 1 second.
-        for (var i in info.traces) {
-          for (var x in info.traces[i].act.authorization) { res['sender'] = info.traces[i].act.authorization[x].actor }
-          res['receiver'] = info.traces[i].receipt.receiver
-          res['smart contract owner'] = info.traces[i].act.account
-          res['message'] = info.traces[i].act.data.message
-          // full data object:
-          // console.log('Transaction data', info.traces[i]);
-        };
-        res['status'] = info.trx.receipt.status
-        res['confirmation height'] = blockHeight - info.block_num
-        res['transaction in block'] = info.block_num
-        res['transaction time in block'] = info.block_time
-        resolve(res)
-      })
-    }),
-
-  getTransaction: async (id, blockNumHint) => {
-    const result = await _this.getTransactionP(id, blockNumHint)
-    console.log('transaction details: ', result)
-    return result
+  //  signs transaction and returns it. Args: (transaction, from, to, quantity, memo = '')
+  signTr: async (tr, from, to, quantity, memo = '') => {
+    const sig = await _this.getSignature(from, to, quantity, memo)
+    tr.transaction.signatures.push(sig)
+    return tr
   },
 
-  getCurrentBlockInfoP: () =>
-    new Promise((resolve, reject) => {
-      eos.getInfo((error, info) => {
-        if (error) reject(error)
-        else resolve(info)
-      })
-    }),
-
-  getCurrentBlockInfo: async () => {
-    const result = await _this.getCurrentBlockInfoP()
-    console.log('current block info: ', result)
-    return result
+  //  insert return value from eos.transfer(..., signed = true, broadcast = false);
+  pushTransaction: async tr => {
+    const pushed = await eos.pushTransaction(tr)
+    console.log('broadcasted transaction: ', pushed)
   },
 
   // e.g. binancecleos, itamnetwork1
@@ -271,6 +288,7 @@ const _this = module.exports = {
       resolve(trx)
     }),
 
+  //  accountName, (+ int allAboveBlockHeightX --> optional)
   getOutgoingTransactions: async (accountName, height) => {
     const result = await _this.getOutgoingTransactionsP(accountName)
     if (!height) {
@@ -283,80 +301,88 @@ const _this = module.exports = {
     return aboveHeight
   },
 
-  createAccountPackage: async (ownerPubKey, activePubKey, name, bytes = 8192, stake_net_quantity = '10.0000 SYS', stake_cpu_quantity = '10.0000 SYS', transfer = 0) => {
-    const tr = await eos.transaction(tr => {
-      tr.newaccount({
-        creator: 'eosio',
-        name,
-        owner: ownerPubKey,
-        active: activePubKey
+  getTransactionP: async (id, blockNumHint) =>
+    new Promise(async (resolve, reject) => {
+      const blockHeight = await _this.getBlockHeight()
+      await eos.getTransaction(id, blockNumHint, (error, info) => {
+        const res = {}
+        if (error) reject(error)
+        // Transactions can be considered confirmed with 99.9% certainty after an average of 0.25 seconds from time of broadcast.
+        // The EOS aBFT algorithm provides 100% confirmation of irreversibility within 1 second.
+        for (var i in info.traces) {
+          for (var x in info.traces[i].act.authorization) { res['sender'] = info.traces[i].act.authorization[x].actor }
+          res['receiver'] = info.traces[i].receipt.receiver
+          res['smart contract owner'] = info.traces[i].act.account
+          res['message'] = info.traces[i].act.data.message
+          // full data object:
+          // console.log('Transaction data', info.traces[i]);
+        };
+        res['status'] = info.trx.receipt.status
+        res['confirmation height'] = blockHeight - info.block_num
+        res['transaction in block'] = info.block_num
+        res['transaction time in block'] = info.block_time
+        resolve(res)
       })
+    }),
 
-      tr.buyrambytes({
-        payer: 'eosio',
-        receiver: name,
-        bytes
+  //  get transaction info. Optionally with a block number hint (trBlockHeight)
+  //  note: example tr only visible when switching to main net
+  getTransaction: async (id, blockNumHint) => {
+    const result = await _this.getTransactionP(id, blockNumHint)
+    console.log('transaction details: ', result)
+    return result
+  },
+
+  isTransactionExecutedP: async (id, blockNumHint) =>
+    new Promise(async (resolve, reject) => {
+      await eos.getTransaction(id, blockNumHint, (error, info) => {
+        if (error) reject(error)
+        resolve(info.trx.receipt.status === 'executed')
       })
+    }),
 
-      tr.delegatebw({
-        from: 'eosio', // acc_name
-        receiver: name,
-        stake_net_quantity,
-        stake_cpu_quantity,
-        transfer
+  isTransactionExecuted: async (id, blockNumHint) => {
+    const executed = await _this.isTransactionExecutedP(id, blockNumHint)
+    console.log(`transaction: ${id} \nwas executed: ${executed}`)
+    return executed
+  },
+
+  //  ---- CURRENCY ----
+
+  // If you look at the result value, you can see an array in the form of a string.
+  // This is because there could be tokens with many different symbols in the account
+  getCurrencyBalanceP: (accountName, contractName = 'eosio.token') =>
+    new Promise((resolve, reject) => {
+      eos.getCurrencyBalance(contractName, accountName, (error, result) => {
+        if (error) reject(error)
+        resolve(result)
       })
-    })
-    console.log('createAccountPackage tr: ', tr)
+    }),
+
+  getCurrencyBalance: async (accountName, contractName = 'eosio.token') => {
+    const result = await _this.getCurrencyBalanceP(accountName, contractName)
+    console.log(`balance of ${accountName}: `, result)
   },
 
-  // Must be less than 13 characters
-  // Can only contain the following symbols: .12345abcdefghijklmnopqrstuvwxyz
-
-  createSingleAccount: async (name, ownerPubKey, activePubKey) => {
-    const tr = await eos.transaction(tr => {
-      tr.newaccount({
-        creator: 'eosio', // account_name
-        name, // new account name
-        owner: ownerPubKey, // owner pubkey
-        active: activePubKey // active pubkey
+  getCurrencyStatsP: (symbol, contractName) =>
+    new Promise((resolve, reject) => {
+      eos.getCurrencyStats(contractName, symbol, (error, result) => {
+        if (error) reject(error)
+        resolve(result)
+        // output { EOS: { supply: '1006148640.3388 EOS', max_supply: '10000000000.0000 EOS',
+        //         issuer: 'eosio' } }
       })
-    })
-    console.log('createSingleAccount tr: ', tr)
-    return tr
+    }),
+
+  // works for tokens as well, see https://github.com/eoscafe/eos-airdrops
+  // 'SYMBOL', 'eos.contractName'
+  getCurrencyStats: async (symbol, contractName = 'eosio.token') => {
+    const result = await _this.getCurrencyStatsP(symbol, contractName)
+    console.log(result)
+    return result
   },
 
-  transfer: async (from, to, quantity, memo = '', sign = true, broadcast = true) => {
-    const tr = await eos.transfer(from, to, quantity, memo, { broadcast, sign })
-    console.log('created transaction: ', tr)
-    return tr.transaction
-  },
-
-  pushTransaction: async tr => {
-    const pushed = await eos.pushTransaction(tr)
-    console.log('broadcasted transaction: ', pushed)
-  },
-
-  transferSignPushTransaction: async (from, to, quantity, memo = '') => {
-  // creates 1) unsigned transaction 2) signs 3) broadcasts tr
-    const tr = await eos.transfer(from, to, quantity, memo, { broadcast: false, sign: false })
-    console.log('created unsigned tr: ', tr)
-    const signedTr = await _this.signTr(tr, from, to, quantity, memo)
-    await _this.pushTransaction(signedTr.transaction)
-  },
-
-  getSignature: async (from, to, quantity, memo = '') => {
-    // returns promise:
-    const tr = await eos.transfer(from, to, quantity, memo, { broadcast: false })
-    console.log('created signature: ', tr.transaction.signatures[0])
-    return tr.transaction.signatures[0]
-  },
-
-  signTr: async (tr, from, to, quantity, memo = '') => {
-    const sig = await _this.getSignature(from, to, quantity, memo)
-    tr.transaction.signatures.push(sig)
-    return tr
-  },
-
+  //  amount in format '1000.0000 XYZ', receiver, memo:
   createToken: async (amountNsymbol, to, memo = '') => {
     await eos.transaction('eosio.token', acc => {
       // Create the initial token with its max supply
@@ -373,5 +399,10 @@ const _this = module.exports = {
     console.log(`currency balance ${to}: `, balance)
     const balance2 = await eos.getCurrencyBalance('eosio.token', 'eosio.token')
     console.log('currency balance eosio.token: ', balance2)
-  }
+  },
+
+  //  ---- OTHER ----
+  //  converts '1.3000 EOS' --> 1.3, see floatRegex in eosj.js
+  toFloat: str => parseFloat(str.replace(floatRegex, ''))
+
 }
