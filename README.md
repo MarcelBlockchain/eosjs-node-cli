@@ -8,7 +8,7 @@ using [eosjs](https://github.com/EOSIO/eosjs)
 
 | [MarcelBlockchain/eosjs-node-cli](/MarcelBlockchain/eosjs-node-cli) | [Npm](https://www.npmjs.com/package/eosjs-node-cli)  |
 | --- | --- |
-| tag: 0.0.5 | `npm install eosjs-node-cli` |
+| tag: 0.0.6 | `npm install eosjs-node-cli` |
   
 ## Usage
 * Using standard private key on test net by default. Change ```config``` in ```./eos.js```
@@ -54,23 +54,18 @@ eos.createSingleAccount('accountName', pubKeyTest, pubKeyTest)
 * Transactions can be considered confirmed with 99.9% certainty after an average of 0.25 seconds from time of broadcast.
 * The EOS aBFT algorithm provides 100% confirmation of irreversibility within 1 second.
 ```js 
-// Transactions can be considered confirmed with 99.9% certainty after an average of 0.25 seconds from time of broadcast.
-// The EOS aBFT algorithm provides 100% confirmation of irreversibility within 1 second.
-//  sender, receiver, amount in format: '50.0000 SYS' , memo, | + optional: sign = true, broadcast = true
+//  sender, receiver, quantity in format: '50.0000 SYS' , memo, | + optional: sign = true, broadcast = true
 eos.transfer(acc1, acc2, '4.0000 SYS', 'myMemo1', true, true)
 //  first creates an unsigned transaction, signs it and then broadcasts it. All separately. See logs()
-//  trx data from transaction.transaction.actions[0].data
 eos.transferSignPushTransaction(acc1, acc2, '5.0000 SYS', 'myMemo2', privKeyTest)
 //  just signs the transaction and returns it:
-eos.signTransaction(trxData, privKeyTest)
+//  returns signature. Args: (from, to, quantity, memo = '')
+eos.getSignature(acc1, acc2, quantityTest, memo = 'myMemo7')
 //  insert return value from eos.transfer(..., signed = true, broadcast = false);
 eos.pushTransaction(returnValueFromEos.transfer)
-//  transfers and broadcasts the transaction separately:
-eos.transferPushTransaction(acc1, acc2, '5.0000 SYS', 'myMemo2')
 //  accountName, (+ int allAboveBlockHeightX --> optional)
 eos.getOutgoingTransactions(accBinance)
 //  perform transaction and add the id + block number as arg:
-//  where to get blockNumHint? https://github.com/EOSIO/eosjs/issues/288
 eos.getTransaction(exampleTrxMainNet, trBlockHeight) // sender: 'binancecleos' on main net
 eos.isTransactionExecuted(exampleTrxMainNet, trBlockHeight)
 ```

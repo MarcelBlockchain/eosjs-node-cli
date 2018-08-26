@@ -10,25 +10,25 @@ const blockNumHintTest = '9100334'
 // const pubKey2Test = 'EOS7pMyqadiD7DE7uZEHuEejZu2Qa7kiMmNVHf35bJEtqyniy8vBG';
 
 // ----MAIN NET----
-const config = {
-  chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', // main net
-  // keyProvider: ['MY PRIVATE KEY'], //used globally for signing transactions
-  keyProvider: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
-  httpEndpoint: 'https://api.eosnewyork.io:443', // main net
-  expireInSeconds: 60,
-  sign: true, // sign the transaction with a private key. Leaving a transaction unsigned avoids the need to provide a private key
-  broadcast: true, // post the transaction to the blockchain. Use false to obtain a fully signed transaction
-  verbose: false // verbose logging such as API activity
-}
+// const config = {
+//   chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', // main net
+//   // keyProvider: ['MY PRIVATE KEY'], //used globally for signing transactions
+//   keyProvider: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
+//   httpEndpoint: 'https://api.eosnewyork.io:443', // main net
+//   expireInSeconds: 60,
+//   sign: true, // sign the transaction with a private key. Leaving a transaction unsigned avoids the need to provide a private key
+//   broadcast: true, // post the transaction to the blockchain. Use false to obtain a fully signed transaction
+//   verbose: false // verbose logging such as API activity
+// }
 
 // ----TEST NET----
-// const config = {
-//   //keyProvider: ['MY PRIVATE KEY'], //used globally for signing transactions
-//   keyProvider: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
-//   //sign: true,  // sign the transaction with a private key. Leaving a transaction unsigned avoids the need to provide a private key
-//   //broadcast: true,  //post the transaction to the blockchain. Use false to obtain a fully signed transaction
-//   verbose: false, //verbose logging such as API activity
-// };
+const config = {
+  // keyProvider: ['MY PRIVATE KEY'], //used globally for signing transactions
+  keyProvider: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
+  // sign: true,  // sign the transaction with a private key. Leaving a transaction unsigned avoids the need to provide a private key
+  // broadcast: true,  //post the transaction to the blockchain. Use false to obtain a fully signed transaction
+  verbose: false // verbose logging such as API activity
+}
 const eos = Eos(config)
 const { ecc } = Eos.modules
 
@@ -325,57 +325,36 @@ const _this = module.exports = {
     return tr
   },
 
-  // see https://github.com/EOSIO/eosjs/issues/306
-  transferSignPushTransaction: async (from, to, amount, memo = '', privKey) => {
-    const options = {
-      authorization: `${from}@active`, // @active for activeKey, @owner for Owner key
-      // default authorizations will be calculated.
-      broadcast: false,
-      sign: false
-    }
-    const transaction = await eos.transaction(
-      'eosio.token',
-      acc => {
-        acc.transfer(from, to, amount, memo)
-      },
-      options
-    )
-    const sig = await _this.signTransaction(transaction.transaction.transaction.actions[0].data, privKey)
-    transaction.transaction.signatures.push(sig)
-    console.log(chalk.green('signed transaction: '), transaction.transaction)
-    _this.pushTransaction(transaction.transaction)
-    return transaction.transaction
-  },
-
-  transfer: async (from, to, amount, memo = '', sign = true, broadcast = true) => {
-    const options = {
-      // authorization: `${from}@active`, //@active for activeKey, @owner for Owner key
-      // default authorizations will be calculated.
-      broadcast,
-      sign
-    }
-
-    const transaction = await eos.transaction(
-      'eosio.token',
-      acc => {
-        acc.transfer(from, to, amount, memo)
-      },
-      options
-    )
-    console.log('transfer: ', transaction)
-    return transaction.transaction
+  transfer: async (from, to, quantity, memo = '', sign = true, broadcast = true) => {
+    const tr = await eos.transfer(from, to, quantity, memo, { broadcast, sign })
+    console.log('created transaction: ', tr)
+    return tr.transaction
   },
 
   pushTransaction: async tr => {
     const pushed = await eos.pushTransaction(tr)
-    console.log('pushed: ', pushed)
-    return pushed
+    console.log('broadcasted transaction: ', pushed)
   },
 
-  signTransaction: async (trxData, privKey) => {
-    const transaction = await ecc.sign(trxData, privKey)
-    console.log('signature: ', transaction)
-    return transaction
+  transferSignPushTransaction: async (from, to, quantity, memo = '') => {
+  // creates 1) unsigned transaction 2) signs 3) broadcasts tr
+    const tr = await eos.transfer(from, to, quantity, memo, { broadcast: false, sign: false })
+    console.log('created unsigned tr: ', tr)
+    const signedTr = await _this.signTr(tr, from, to, quantity, memo)
+    await _this.pushTransaction(signedTr.transaction)
+  },
+
+  getSignature: async (from, to, quantity, memo = '') => {
+    // returns promise:
+    const tr = await eos.transfer(from, to, quantity, memo, { broadcast: false })
+    console.log('created signature: ', tr.transaction.signatures[0])
+    return tr.transaction.signatures[0]
+  },
+
+  signTr: async (tr, from, to, quantity, memo = '') => {
+    const sig = await _this.getSignature(from, to, quantity, memo)
+    tr.transaction.signatures.push(sig)
+    return tr
   },
 
   createToken: async (amountNsymbol, to, memo = '') => {
@@ -394,12 +373,5 @@ const _this = module.exports = {
     console.log(`currency balance ${to}: `, balance)
     const balance2 = await eos.getCurrencyBalance('eosio.token', 'eosio.token')
     console.log('currency balance eosio.token: ', balance2)
-  },
-
-  transferPushTransaction: async (from, to, amount, memo = '') => {
-    const tr = await _this.transfer(from, to, amount, memo, true, false) // has no receipt
-    const push = await _this.pushTransaction(tr) // has receipt, since it was published and is 'executed'
-    console.log('transferred and pushed transaction: ', push)
-    return push
   }
 }
