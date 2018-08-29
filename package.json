@@ -1,6 +1,6 @@
 {
   "name": "eosjs-node-cli",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "basic cleos as nodejs version using eosjs",
   "main": "app.js",
   "scripts": {
