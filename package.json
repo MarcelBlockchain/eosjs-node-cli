@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/MarcelBlockchain/eosjs-node-cli#readme",
   "dependencies": {
+    "bip39": "^2.5.0",
     "chalk": "^2.4.1",
     "clear": "^0.1.0",
     "eosjs": "^16.0.0",

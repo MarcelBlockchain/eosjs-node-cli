@@ -38,6 +38,11 @@ const quantityTest = '2.0000 SYS'
 // async main (alles rein)
 // ----KEYS----
 //  more infos: https://github.com/EOSIO/eosjs-ecc/blob/master/src/key_private.js
+
+//  src: https://github.com/bitcoinjs/bip39/blob/master/index.js
+//  Generate a random mnemonic (uses crypto.randomBytes under the hood), defaults to 128-bits of entropy
+//  and derives the master, owner & active private keys
+// eos.deriveFromMnemonic(eos.generateMnemonic())
 //  seed: 'string' any length string. This is private. The same seed produces the same
 //  private key every time. At least 128 random bits should be used to produce a good private key.
 // eos.generateRandomPrivKey()
@@ -84,7 +89,7 @@ const quantityTest = '2.0000 SYS'
 // eos.getOutgoingTransactions(accBinance)
 //  perform transaction and add the id + block number as args
 //  note: example tr only visible when switching to main net
-eos.getTransaction(exampleTrxMainNet, trBlockHeight) // sender: 'binancecleos' on main net
+// eos.getTransaction(exampleTrxMainNet, trBlockHeight) // sender: 'binancecleos' on main net
 // eos.isTransactionExecuted(exampleTrxMainNet, trBlockHeight)
 
 // ----CURRENCY----

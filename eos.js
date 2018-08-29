@@ -1,5 +1,6 @@
 const chalk = require('chalk')
 const Eos = require('eosjs')
+const bip39 = require('bip39')
 
 const floatRegex = /[^\d.-]/g
 // ----TEST VARIABLES----
@@ -8,6 +9,10 @@ const transactionIDtest = 'd4d95c85db899a0e54328b2f0c2e2062f1d7dc4445d0400883636
 const blockNumHintTest = '9100334'
 // const privKeyTest = '5HrZWBGf6ovYBqdDkoGBqzXCKRxyXdkEmke6LVufN3zK4q9Hctc';
 // const pubKey2Test = 'EOS7pMyqadiD7DE7uZEHuEejZu2Qa7kiMmNVHf35bJEtqyniy8vBG';
+const mnemonicTest =
+  'artwork become april open dance library mushroom dune involve bitter winter layer'
+const mnemonicTest2 =
+  'favorite lunch excess must month original potato blame charge curtain display salute'
 
 // ----MAIN NET----
 // const config = {
@@ -69,6 +74,28 @@ const _this = module.exports = {
   // EOS public and private keys can be generated off the chain, but EOS users need to create a user
   // name before they can operate on the chain. So activated users are needed to send on-chain transactions
   // to new users in order to help them create accounts. By default users need to find Tripartite help.
+
+  generateMnemonic: (strength = 128, rng, wordlist) => {
+    // std args: bip39.generateMnemonic (strength = 128, rng = randomBytes(), wordlist = english)
+    // strength = 256 for 24 words, 126 for 12
+    const mnemonic = bip39.generateMnemonic(strength, rng, wordlist)
+    console.log(mnemonic)
+    return mnemonic
+  },
+
+  deriveFromMnemonic: mnemonic => {
+    const master = ecc.PrivateKey.fromSeed(mnemonic)
+    const owner = master.getChildKey('owner')
+    const active = owner.getChildKey('active')
+    const masterPK = master.toWif()
+    const ownerPK = owner.toWif()
+    const activePK = active.toWif()
+    console.log('master PK: ', masterPK)
+    console.log('owner PK: ', ownerPK)
+    console.log('active PK: ', activePK)
+    // return { masterPK, ownerPK, activePK }
+    return activePK
+  },
 
   generateRandomPrivKeyP: () =>
     new Promise((resolve, reject) => {
