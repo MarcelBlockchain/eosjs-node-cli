@@ -75,6 +75,8 @@ const _this = module.exports = {
   // name before they can operate on the chain. So activated users are needed to send on-chain transactions
   // to new users in order to help them create accounts. By default users need to find Tripartite help.
 
+  //  src: https://github.com/bitcoinjs/bip39/blob/master/index.js
+  //  Generates a random mnemonic (uses crypto.randomBytes under the hood), defaults to 128-bits of entropy
   generateMnemonic: (strength = 128, rng, wordlist) => {
     // std args: bip39.generateMnemonic (strength = 128, rng = randomBytes(), wordlist = english)
     // strength = 256 for 24 words, 126 for 12
@@ -83,6 +85,7 @@ const _this = module.exports = {
     return mnemonic
   },
 
+  //  derives the master, owner & active private keys from mnemonic
   deriveFromMnemonic: mnemonic => {
     const master = ecc.PrivateKey.fromSeed(mnemonic)
     const owner = master.getChildKey('owner')
