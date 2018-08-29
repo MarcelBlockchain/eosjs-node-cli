@@ -96,8 +96,7 @@ const _this = module.exports = {
     console.log('master PK: ', masterPK)
     console.log('owner PK: ', ownerPK)
     console.log('active PK: ', activePK)
-    // return { masterPK, ownerPK, activePK }
-    return activePK
+    return { masterPK, ownerPK, activePK }
   },
 
   generateRandomPrivKeyP: () =>
