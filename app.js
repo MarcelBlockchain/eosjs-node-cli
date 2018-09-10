@@ -35,7 +35,6 @@ const quantityTest = '2.0000 SYS'
 // ----BLOCKCHAIN----
 // eos.getBlockHeight()
 // eos.getCurrentBlockInfo()
-// async main (alles rein)
 // ----KEYS----
 //  more infos: https://github.com/EOSIO/eosjs-ecc/blob/master/src/key_private.js
 
