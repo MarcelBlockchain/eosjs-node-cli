@@ -10,7 +10,7 @@ console.log(
 console.log(chalk.blue('made by Marcel Morales'))
 console.log(chalk.green('Using standard private key on test net by default. Change --config-- in ./eos.js'))
 console.log(chalk.green('Make sure to have docker running as explained at https://github.com/EOSIO/eosjs/tree/master/docker'))
-console.log(chalk.green('Uncomment line to enable functions in ./app.js and get --help'))
+console.log(chalk.green('out comment line to enable functions in ./app.js and get --help'))
 
 // ----TEST VARIABLES ----
 const pubKeyTest = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV' // from privKeyTest, local test net
@@ -41,12 +41,14 @@ const quantityTest = '2.0000 SYS'
 
 //  src: https://github.com/bitcoinjs/bip39/blob/master/index.js
 //  Generate a random mnemonic (uses crypto.randomBytes under the hood), defaults to 128-bits of entropy
-//  and derives the master, owner & active private keys
-// eos.deriveFromMnemonic(eos.generateMnemonic())
+//  strength = 256 for 24 words, 128 for 12
+//  derives the master, owner & active private and public keys of mnemonic
+// eos.generateMnemonic()
+// eos.deriveFromMnemonic(eos.generateMnemonic(128))
 //  seed: 'string' any length string. This is private. The same seed produces the same
 //  private key every time. At least 128 random bits should be used to produce a good private key.
-// eos.generateRandomPrivKey()
 // console.log('privKey generated from seed SEED123: ', eos.generatePrivKeyFromSeed('SEED123'))
+// eos.generateRandomPrivKey()
 // eos.fromPrivToPub(privKeyTest)
 // eos.isPubKeyValid(pubKeyTest)
 // eos.isPrivKeyValid(privKeyTest)

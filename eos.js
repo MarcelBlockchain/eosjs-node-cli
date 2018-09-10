@@ -85,18 +85,32 @@ const _this = module.exports = {
     return mnemonic
   },
 
-  //  derives the master, owner & active private keys from mnemonic
+  //  derives the master, owner & active private and public keys from mnemonic
   deriveFromMnemonic: mnemonic => {
     const master = ecc.PrivateKey.fromSeed(mnemonic)
     const owner = master.getChildKey('owner')
     const active = owner.getChildKey('active')
-    const masterPK = master.toWif()
+    const masterPK = `PW${master.toWif()}`
     const ownerPK = owner.toWif()
     const activePK = active.toWif()
-    console.log('master PK: ', masterPK)
-    console.log('owner PK: ', ownerPK)
-    console.log('active PK: ', activePK)
-    return { masterPK, ownerPK, activePK }
+    const ownerPub = owner.toPublic().toString()
+    const activePub = active.toPublic().toString()
+    console.log('master private key: ', masterPK)
+    console.log('owner private key: ', ownerPK)
+    console.log('owner public key: ', ownerPub)
+    console.log('active private key: ', activePK)
+    console.log('active public key: ', activePub)
+    return {
+      masterPK,
+      privateKeys: {
+        ownerPK,
+        activePK
+      },
+      publicKeys: {
+        ownerPub,
+        activePub
+      }
+    }
   },
 
   generateRandomPrivKeyP: () =>

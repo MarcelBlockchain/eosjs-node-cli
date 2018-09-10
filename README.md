@@ -8,7 +8,7 @@ using [eosjs](https://github.com/EOSIO/eosjs)
 
 | [MarcelBlockchain/eosjs-node-cli](/MarcelBlockchain/eosjs-node-cli) | [Npm](https://www.npmjs.com/package/eosjs-node-cli)  |
 | --- | --- |
-| tag: 0.1.0 | `npm install eosjs-node-cli` |
+| tag: 0.1.1 | `npm install eosjs-node-cli` |
   
 ## Usage
 * Using standard private key on test net by default. Change ```config``` in ```./eos.js```
@@ -28,8 +28,10 @@ eos.getCurrentBlockInfo()
 ```js
 //  src: https://github.com/bitcoinjs/bip39/blob/master/index.js
 //  Generates a random mnemonic (uses crypto.randomBytes under the hood), defaults to //  128-bits of entropy
-//  and derives the master, owner & active private keys
-eos.deriveFromMnemonic(eos.generateMnemonic())
+//  strength = 256 for 24 words, 128 for 12
+eos.generateMnemonic(128)
+//  derives the master, owner & active private and public keys from mnemonic
+eos.deriveFromMnemonic(eos.generateMnemonic(128))
 eos.generateRandomPrivKey()
 console.log(eos.generatePrivKeyFromSeed('SEED123'))
 eos.fromPrivToPub(privKeyTest)
